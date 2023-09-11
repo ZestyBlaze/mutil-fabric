@@ -1,5 +1,6 @@
 package se.mickelus.mutil.network;
 
+import io.github.fabricators_of_create.porting_lib.util.ServerLifecycleHooks;
 import me.pepperbell.simplenetworking.SimpleChannel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +26,7 @@ public class PacketHandler {
     private final SimpleChannel channel;
     private final ArrayList<Class<? extends AbstractPacket>> packets = new ArrayList<>();
 
-    public PacketHandler(String namespace, String channelId, String protocolVersion) {
+    public PacketHandler(String namespace, String channelId) {
         channel = new SimpleChannel(new ResourceLocation(namespace, channelId));
     }
 
@@ -48,6 +49,7 @@ public class PacketHandler {
             return false;
         }
 
+        /* //TODO:Finish this off
         channel.messageBuilder(packetClass, packets.size())
                 .encoder(AbstractPacket::toBytes)
                 .decoder(buffer -> {
@@ -57,11 +59,13 @@ public class PacketHandler {
                 })
                 .consumerNetworkThread(this::onMessage)
                 .add();
+         */
 
         packets.add(packetClass);
         return true;
     }
 
+    /* //TODO:Finish this off
     public void onMessage(AbstractPacket message, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (ctx.get().getDirection().getReceptionSide().isServer()) {
@@ -72,6 +76,7 @@ public class PacketHandler {
         });
         ctx.get().setPacketHandled(true);
     }
+     */
 
     @Environment(EnvType.CLIENT)
     private Player getClientPlayer() {
@@ -79,15 +84,18 @@ public class PacketHandler {
     }
 
     public void sendTo(AbstractPacket message, ServerPlayer player) {
-        channel.sendTo(message, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        //channel.sendTo(message, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        channel.sendToClient(message, player);
     }
 
     public void sendToAllPlayers(AbstractPacket message) {
-        channel.send(PacketDistributor.ALL.noArg(), message);
+        //channel.send(PacketDistributor.ALL.noArg(), message);
+        channel.sendToClientsInCurrentServer(message);
     }
 
     public void sendToAllPlayersNear(AbstractPacket message, BlockPos pos, double r2, ResourceKey<Level> dim) {
-        channel.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.getX(), pos.getY(), pos.getZ(), r2, dim)), message);
+        //channel.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.getX(), pos.getY(), pos.getZ(), r2, dim)), message);
+        channel.sendToClientsAround(message, ServerLifecycleHooks.getCurrentServer().getLevel(dim), new Vec3(pos.getX(), pos.getY(), pos.getZ()), r2);
     }
 
     @Environment(EnvType.CLIENT)

@@ -16,11 +16,13 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "se.mickelus.mutil.MUtilMod"
+			"se.mickelus.mutil.MUtilMod"
+		],
+		"client": [
+			"se.mickelus.mutil.MUtilMod"
 		]
 	},
 	"mixins": [
-		"mutil.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.14.22",

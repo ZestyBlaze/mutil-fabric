@@ -19,7 +19,6 @@ class ConfigHandler {
         if (FabricLoader.getInstance().getEnvironmentType().equals(EnvType.CLIENT)) {
             setupClient();
             ForgeConfigRegistry.INSTANCE.register(MUtilMod.MOD_ID, ModConfig.Type.CLIENT, clientSpec);
-            //FMLJavaModLoadingContext.get().getModEventBus().register(ConfigHandler.client);
         }
     }
 
